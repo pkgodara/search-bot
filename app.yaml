@@ -1,0 +1,3 @@
+runtime: python38
+service: search-bot
+entrypoint: python main.py

@@ -28,8 +28,6 @@ connection.commit()
 
 # Bot url: https://discord.com/api/oauth2/authorize?client_id=763236009323921409&permissions=8&scope=bot
 
-def print_hi(name):
-    print(f'Hi, {name}')
 
 
 def g_search(query):
@@ -50,19 +48,19 @@ def db_put(channel, author, query):
 
 
 def db_get(channel, author, query):
+    res = ""
     with connection.cursor() as cursor:
-        sql = "SELECT * FROM `history` " \
+        sql = "SELECT `query` FROM `history` " \
               "WHERE `channel`=" + str(channel) + " AND `author`=" + str(author) + " AND `query` LIKE '%" + query + "%' " \
               "ORDER BY `ts` DESC limit 10"
         cursor.execute(sql)
         result = cursor.fetchall()
-        # print(result)
-    return result
+        for r in result:
+            res += r[0] + "\n"
+    return res
 
 
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
     client = discord.Client()
 
 
@@ -95,6 +93,8 @@ if __name__ == '__main__':
                 print("query:: ", query)
                 db_put(message.channel.id, message.author.id, query)
                 response = g_search(query)
+                if len(response) == 0:
+                    response = "Ooo!! No results found by that for you."
             else:
                 response = 'Ooo! Please specify some search term.'
             await message.channel.send(response)
@@ -110,6 +110,8 @@ if __name__ == '__main__':
                 query = msg[1]
                 print("query:: ", query)
                 response = db_get(message.channel.id, message.author.id, query)
+                if len(response) == 0:
+                    response = "Ooo!! No queries found by that for you."
             else:
                 response = 'Ooo! Please specify some search term.'
             await message.channel.send(response)
